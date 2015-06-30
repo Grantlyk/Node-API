@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(function(req, res, next){
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, \ Authorization');
+	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, Authorization');
 	next();
 });
 
@@ -26,9 +26,33 @@ app.get('/', function(req, res){
 
 var apiRouter = express.Router();
 
+apiRouter.use(function(req, res, next){
+	console.log('Somebody just came to our app!');
+	next();
+});
+
 apiRouter.get('/', function(req, res){
 	res.json({ message: 'hooray! welcome to our api!' });
 });
+
+apiRouter.route('/users')
+	.post(function(req, res){
+			var user = new User();
+
+			user.name = req.body.name;
+			user.username = req.body.username;
+			user.password = req.body.password;
+
+			user.save(function(err){
+				if (err){
+					if (err.code == 11000)
+						return res.json({ success: false, message: 'A user with that username already exists'});
+					else
+						return res.send(err);
+				}
+					res.json({message: 'User created!'});
+			});
+	});
 
 app.use('/api', apiRouter);
 
