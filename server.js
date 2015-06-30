@@ -15,6 +15,8 @@ app.use(function(req, res, next){
 	next();
 });
 
+mongoose.connect('mongodb://node:nodejs@apollo.modulusmongo.net:27017/mogA4gun');
+
 app.use(morgan('dev'));
 
 app.get('/', function(req, res){
