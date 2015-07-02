@@ -137,6 +137,10 @@ apiRouter.route('/users/:user_id')
 		});
 	});
 
+apiRouter.get('/me', function(req, res){
+	res.send(req.decoded);
+});
+
 app.use('/api', apiRouter);
 
 app.listen(port);
