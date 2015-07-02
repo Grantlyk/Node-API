@@ -5,6 +5,8 @@ var morgan 			= require('morgan');
 var mongoose 		= require('mongoose');
 var port 				= process.env.PORT || 8080;
 var User 				= require('./app/models/user');
+var jwt					= require('jsonwebtoken');
+var superSecret = 'changeMe';
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -25,6 +27,34 @@ app.get('/', function(req, res){
 });
 
 var apiRouter = express.Router();
+
+apiRouter.post('/authenticate', function(req, res){
+	User.findOne({username: req.body.username})
+		.select('name username password').exec(function(err, user){
+			if (err) throw err;
+			if (!user) {
+				res.json({ success: false, message: 'Authentication failed. User not found'});
+			} else if (user) {
+				var validPassword = user.comparePassword(req.body.password);
+				if (!validPassword){
+					res.json({ success: false, message: 'Authentication failed, Wrong password'});
+				} else {
+					var token = jwt.sign({
+						name: user.name, 
+						username: user.username
+					}, superSecret, {
+						expiresInMinutes: 1440
+					});
+
+					res.json({
+						success: true,
+						message: 'Heres your token!',
+						token: token
+					});
+				}
+			}
+		});
+});
 
 apiRouter.use(function(req, res, next){
 	console.log('Somebody just came to our app!');
